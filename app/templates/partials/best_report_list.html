@@ -1,0 +1,29 @@
+{% if reports %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>제목</th>
+            <th>파일명</th>
+            <th>크기</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in reports %}
+        <tr>
+            <td>{{ r.title }}</td>
+            <td><code>{{ r.filename }}</code></td>
+            <td>{{ r.size_kb }}KB</td>
+            <td>
+                <form hx-post="/best-reports/delete" hx-target="#report-list" hx-swap="innerHTML" style="display:inline">
+                    <input type="hidden" name="filename" value="{{ r.filename }}">
+                    <button type="submit" class="btn btn-sm btn-danger">삭제</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty-state">등록된 우수 보고서가 없습니다.</p>
+{% endif %}

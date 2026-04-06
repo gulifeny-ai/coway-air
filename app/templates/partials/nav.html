@@ -1,0 +1,21 @@
+<nav class="sidebar">
+    <div class="sidebar-brand">
+        <h2>Coway-AIR</h2>
+        <span class="subtitle">AI Research</span>
+    </div>
+    <ul class="nav-list">
+        <li><a href="/dashboard" class="nav-link">대시보드</a></li>
+        <li><a href="/research" class="nav-link">시장조사</a></li>
+        <li><a href="/reports" class="nav-link">보고서 생성</a></li>
+        <li><a href="/best-reports" class="nav-link">우수 보고서</a></li>
+        {% if user and user.role == "admin" %}
+        <li><a href="/admin" class="nav-link">관리자 설정</a></li>
+        {% endif %}
+    </ul>
+    <div class="sidebar-footer">
+        {% if user %}
+        <span class="user-info">{{ user.username }}</span>
+        <a href="/logout" class="nav-link logout-link">로그아웃</a>
+        {% endif %}
+    </div>
+</nav>

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- 상단 통계 카드 -->
+<div class="stat-cards">
+    <div class="stat-card">
+        <div class="stat-value">{{ stats.total }}</div>
+        <div class="stat-label">전체 리서치</div>
+    </div>
+    <div class="stat-card stat-blue">
+        <div class="stat-value">{{ stats.in_progress }}</div>
+        <div class="stat-label">진행 중</div>
+    </div>
+    <div class="stat-card stat-green">
+        <div class="stat-value">{{ stats.completed }}</div>
+        <div class="stat-label">완료</div>
+    </div>
+    <div class="stat-card stat-purple">
+        <div class="stat-value">{{ stats.companies_count }}</div>
+        <div class="stat-label">조사 기업 수</div>
+    </div>
+    <div class="stat-card stat-orange">
+        <div class="stat-value">{{ stats.this_week }}</div>
+        <div class="stat-label">이번 주 생성</div>
+    </div>
+</div>
+
+<!-- 리서치 리스트 -->
+<div class="card" style="margin-top:1.5rem">
+    <div class="card-header">
+        <h3>리서치 목록</h3>
+        <a href="/research/new" class="btn btn-primary">리서치 하기</a>
+    </div>
+
+    <div class="search-bar" style="margin-bottom:1rem">
+        <input type="text" name="q" placeholder="제목, 주제, 기업명, 키워드로 검색..."
+               class="input-lg"
+               hx-get="/research/search"
+               hx-trigger="keyup changed delay:300ms"
+               hx-target="#research-list"
+               hx-swap="innerHTML">
+    </div>
+
+    <div id="research-list">
+        {% include "partials/research_list.html" %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,42 @@
+{% if researches %}
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>제목</th>
+            <th>주제</th>
+            <th>기업</th>
+            <th>키워드</th>
+            <th>상태</th>
+            <th>생성자</th>
+            <th>생성일</th>
+            <th>수정일</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for r in researches %}
+        <tr class="clickable-row" onclick="location.href='/research/{{ r.id }}'">
+            <td><strong>{{ r.title }}</strong></td>
+            <td>{{ r.topic }}</td>
+            <td>{{ r.company_name }}</td>
+            <td>
+                {% for kw in r.keywords %}
+                <span class="tag">{{ kw }}</span>
+                {% endfor %}
+            </td>
+            <td><span class="status status-{{ r.status }}">{{ r.status }}</span></td>
+            <td>{{ r.creator }}</td>
+            <td class="text-muted">{{ r.created_at }}</td>
+            <td class="text-muted">{{ r.updated_at }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p class="empty-state">
+    {% if query %}
+    "{{ query }}"에 대한 검색 결과가 없습니다.
+    {% else %}
+    아직 생성된 리서치가 없습니다. <a href="/research/new">리서치 하기</a>를 눌러 시작하세요.
+    {% endif %}
+</p>
+{% endif %}

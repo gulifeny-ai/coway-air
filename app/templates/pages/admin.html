@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if message %}
+<div class="alert">{{ message }}</div>
+{% endif %}
+
+<div class="card">
+    <h3>환경 설정</h3>
+    <form method="post" action="/admin/settings">
+        <table class="settings-table">
+            <thead>
+                <tr>
+                    <th>설정 항목</th>
+                    <th>값</th>
+                    <th>설명</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in settings %}
+                <tr>
+                    <td><code>{{ item.key }}</code></td>
+                    <td>
+                        {% if "KEY" in item.key or "SECRET" in item.key %}
+                        <input type="password" name="{{ item.key }}" value="{{ item.value }}" class="input-sm">
+                        {% else %}
+                        <input type="text" name="{{ item.key }}" value="{{ item.value }}" class="input-sm">
+                        {% endif %}
+                    </td>
+                    <td class="text-muted">{{ item.description }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-primary" style="margin-top:1rem">설정 저장</button>
+    </form>
+</div>
+{% endblock %}

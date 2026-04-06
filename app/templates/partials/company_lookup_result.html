@@ -1,0 +1,17 @@
+{% if company %}
+<div class="lookup-result">
+    <div class="lookup-header">
+        <strong>{{ company.name }}</strong>
+        <span class="tag">{{ company.source }}</span>
+    </div>
+    <table class="detail-table">
+        <tr><th>기업코드</th><td>{{ company.corp_code }}</td><th>업종</th><td>{{ company.industry }}</td></tr>
+        <tr><th>대표이사</th><td>{{ company.ceo }}</td><th>소재지</th><td>{{ company.address }}</td></tr>
+        <tr><th>주주현황</th><td colspan="3">{{ company.shareholders }}</td></tr>
+        <tr><th>임직원수</th><td>{{ company.employee_count }}</td><th>매출액</th><td>{{ company.revenue }}</td></tr>
+        <tr><th>영업이익</th><td>{{ company.operating_profit }}</td><th>순이익</th><td>{{ company.net_income }}</td></tr>
+    </table>
+</div>
+{% else %}
+<p class="empty-state">기업 정보를 찾을 수 없습니다.</p>
+{% endif %}

@@ -1,0 +1,11 @@
+venv/
+__pycache__/
+*.pyc
+.env
+data/reports/*
+data/uploads/*
+data/embeddings/*
+data/cache/*
+data/dart/dart_corp_index.json
+!data/**/.gitkeep
+.DS_Store

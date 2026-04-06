@@ -1,0 +1,19 @@
+{% if results %}
+<div class="lookup-result">
+    <div class="lookup-header">
+        <strong>검색: "{{ query }}"</strong>
+        <span class="text-muted">{{ results | length }}건</span>
+    </div>
+    <div class="web-results">
+        {% for item in results %}
+        <div class="web-result-item">
+            <a href="{{ item.url }}" target="_blank" class="web-result-title">{{ item.title }}</a>
+            <p class="web-result-snippet">{{ item.snippet }}</p>
+            <span class="text-muted">{{ item.url }}</span>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+<p class="empty-state">검색 결과가 없습니다.</p>
+{% endif %}

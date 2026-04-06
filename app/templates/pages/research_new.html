@@ -1,0 +1,383 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h3>새 리서치</h3>
+
+    <div class="form-group">
+        <label for="title">리서치 제목</label>
+        <input type="text" id="title" placeholder="예: 코웨이 2025년 사업 전망 분석" required>
+    </div>
+    <div class="form-group">
+        <label for="topic">조사 주제</label>
+        <input type="text" id="topic" placeholder="예: 환경가전 시장 동향 및 경쟁사 분석" required>
+    </div>
+
+    <!-- Step 1: DART 기업 검색 + 선택 + 상세 조회 -->
+    <details class="step-section" open>
+        <summary class="section-divider"><span>Step 1. 대상 기업 정보 수집</span></summary>
+        <div class="step-body">
+            <div class="form-group">
+                <label>DART 기업 검색</label>
+                <div class="corp-search-box" id="corp-search-box">
+                    <div class="corp-tags" id="corp-tags"></div>
+                    <input type="text" id="dart-query" placeholder="기업명 또는 기업코드 입력"
+                           hx-get="/research/dart-search"
+                           hx-trigger="keyup changed delay:300ms"
+                           hx-target="#dart-results"
+                           hx-swap="innerHTML"
+                           name="q"
+                           autocomplete="off"
+                           class="corp-search-input">
+                </div>
+            </div>
+
+            <div id="dart-results" class="dart-dropdown"></div>
+
+            <div id="lookup-action" style="display:none; margin-bottom:1rem">
+                <button type="button" class="btn btn-primary" onclick="lookupCompanies()">
+                    선택된 기업 정보 검색
+                </button>
+            </div>
+
+            <div id="company-info"></div>
+        </div>
+    </details>
+
+    <!-- Step 2: 키워드 기반 웹 검색 -->
+    <details class="step-section" open>
+        <summary class="section-divider"><span>Step 2. 키워드 기반 웹 검색</span></summary>
+        <div class="step-body">
+            <div class="form-group">
+                <label for="keywords">검색어</label>
+                <input type="text" id="keywords" placeholder="검색어를 입력하고 Enter"
+                       onkeydown="if(event.key==='Enter'){event.preventDefault();searchNews();}">
+                <p class="text-muted" style="margin-top:0.3rem; font-size:0.8rem">검색어 입력 후 Enter를 누르면 직전 20일 뉴스를 검색합니다. 선택된 뉴스는 유지됩니다.</p>
+            </div>
+
+            <div id="news-results" class="info-panel">
+                <p class="empty-state">검색어를 입력하고 Enter를 누르면 직전 20일 뉴스 결과가 표시됩니다.</p>
+            </div>
+        </div>
+    </details>
+
+    <!-- Step 3: AI 리서치 -->
+    <details class="step-section" open>
+        <summary class="section-divider"><span>Step 3. AI 리서치</span></summary>
+        <div class="step-body">
+            <div class="form-group">
+                <div class="label-row">
+                    <label for="ai-prompt">AI에 리서치를 요청할 내용을 입력하세요.</label>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="togglePromptEditor()">
+                        프롬프트 엔지니어링
+                    </button>
+                </div>
+                <div class="form-row">
+                    <input type="text" id="ai-prompt" placeholder="예: 코웨이의 동남아 시장 진출 전략과 경쟁 환경을 분석해줘">
+                    <button type="button" class="btn btn-primary" onclick="runAiResearch()">
+                        AI 리서치
+                    </button>
+                </div>
+            </div>
+
+            <!-- 프롬프트 엔지니어링 편집기 -->
+            <div id="prompt-editor" class="prompt-editor" style="display:none">
+                <div class="prompt-editor-header">
+                    <label>시스템 프롬프트 (AI에게 전달되는 역할/형식 지시)</label>
+                    <button type="button" class="btn btn-sm btn-secondary" onclick="resetPrompt()">기본값 복원</button>
+                </div>
+                <textarea id="system-prompt" rows="15"></textarea>
+            </div>
+
+            <!-- 수집된 데이터 미리보기 -->
+            <div id="ai-collected-data">
+                <details class="ai-context-block">
+                    <summary>수집된 기업 정보</summary>
+                    <div id="ai-company-preview" class="ai-context-pre">
+                        <span class="text-muted">기업 정보 검색 후 표시됩니다.</span>
+                    </div>
+                </details>
+                <details class="ai-context-block">
+                    <summary>선택된 뉴스</summary>
+                    <div id="ai-news-preview" class="ai-context-pre">
+                        <span class="text-muted">뉴스 선택 후 표시됩니다.</span>
+                    </div>
+                </details>
+            </div>
+
+            <div id="ai-result" class="info-panel" style="margin-top:1rem">
+                <p class="empty-state">내용을 입력하고 "AI 리서치"를 클릭하면 수집된 데이터를 기반으로 AI가 분석합니다.</p>
+            </div>
+        </div>
+    </details>
+
+    <!-- 리서치 저장 폼 -->
+    <form method="post" action="/research/create" id="research-form" style="margin-top:1.5rem">
+        <input type="hidden" id="form_title" name="title" value="">
+        <input type="hidden" id="form_topic" name="topic" value="">
+        <input type="hidden" id="company_name" name="company_name" value="">
+        <input type="hidden" id="companies_data" name="companies_data" value="">
+        <input type="hidden" id="keywords_hidden" name="keywords" value="">
+        <input type="hidden" id="ai_report" name="ai_report" value="">
+        <div class="form-actions">
+            <a href="/research" class="btn btn-secondary">취소</a>
+            <button type="submit" class="btn btn-primary">리서치 저장</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+var selectedCorps = [];
+var companyDetailStore = {};
+var defaultSystemPrompt = '';
+var lastAiReport = '';
+
+// 페이지 로드 시 기본 시스템 프롬프트 가져오기
+fetch('/research/default-prompt')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        defaultSystemPrompt = data.system_prompt;
+        document.getElementById('system-prompt').value = defaultSystemPrompt;
+    });
+
+function togglePromptEditor() {
+    var el = document.getElementById('prompt-editor');
+    el.style.display = el.style.display === 'none' ? '' : 'none';
+}
+
+function resetPrompt() {
+    document.getElementById('system-prompt').value = defaultSystemPrompt;
+}
+
+function syncHidden() {
+    var nameInput = document.getElementById('company_name');
+    var dataInput = document.getElementById('companies_data');
+    var action = document.getElementById('lookup-action');
+    nameInput.value = selectedCorps.map(function(c) { return c.name; }).join(', ');
+    dataInput.value = selectedCorps.map(function(c) { return c.name + '|' + c.code; }).join(',');
+    action.style.display = selectedCorps.length > 0 ? '' : 'none';
+}
+
+function renderTags() {
+    var container = document.getElementById('corp-tags');
+    container.innerHTML = '';
+    for (var i = 0; i < selectedCorps.length; i++) {
+        var c = selectedCorps[i];
+        var tag = document.createElement('span');
+        tag.className = 'corp-tag';
+        tag.setAttribute('data-code', c.code);
+        tag.innerHTML = '<span>' + c.name + '_' + c.code + '</span>' +
+            '<button type="button" class="corp-tag-x" data-code="' + c.code + '">&times;</button>';
+        container.appendChild(tag);
+    }
+    container.querySelectorAll('.corp-tag-x').forEach(function(btn) {
+        btn.addEventListener('click', function() { removeCorp(this.getAttribute('data-code')); });
+    });
+    syncHidden();
+}
+
+function addCorpFromRow(btn) {
+    var row = btn.closest('.dart-row');
+    var name = row.getAttribute('data-name');
+    var code = row.getAttribute('data-code');
+    for (var i = 0; i < selectedCorps.length; i++) {
+        if (selectedCorps[i].code === code) return;
+    }
+    selectedCorps.unshift({name: name, code: code});
+    renderTags();
+    row.style.display = 'none';
+    document.getElementById('dart-query').value = '';
+    document.getElementById('dart-results').innerHTML = '';
+}
+
+function removeCorp(code) {
+    selectedCorps = selectedCorps.filter(function(c) { return c.code !== code; });
+    delete companyDetailStore[code];
+    renderTags();
+    var row = document.getElementById('dart-row-' + code);
+    if (row) row.style.display = '';
+}
+
+function lookupCompanies() {
+    if (selectedCorps.length === 0) return;
+    var val = selectedCorps.map(function(c) { return c.name + '|' + c.code; }).join(',');
+
+    // HTML 표시
+    htmx.ajax('POST', '/research/lookup-companies', {
+        target: '#company-info',
+        swap: 'innerHTML',
+        values: {companies: val}
+    });
+
+    // JSON 데이터 저장 (AI용) + 미리보기 갱신
+    fetch('/research/lookup-companies-json', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'companies=' + encodeURIComponent(val)
+    })
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+        data.forEach(function(d) {
+            companyDetailStore[d.corp_code] = d;
+        });
+        updateCompanyPreview();
+    });
+}
+
+function updateCompanyPreview() {
+    var el = document.getElementById('ai-company-preview');
+    var text = collectCompanyText();
+    if (text) {
+        el.innerText = text;
+    } else {
+        el.innerHTML = '<span class="text-muted">기업 정보 검색 후 표시됩니다.</span>';
+    }
+}
+
+function updateNewsPreview() {
+    var el = document.getElementById('ai-news-preview');
+    var text = collectNewsText();
+    if (text) {
+        el.innerText = text;
+    } else {
+        el.innerHTML = '<span class="text-muted">뉴스 선택 후 표시됩니다.</span>';
+    }
+}
+
+function searchNews() {
+    var keywords = document.getElementById('keywords').value;
+    document.getElementById('keywords_hidden').value = keywords;
+    document.getElementById('news-results').innerHTML = '<p class="empty-state">검색 중...</p>';
+    htmx.ajax('POST', '/research/search-news', {
+        target: '#news-results',
+        swap: 'innerHTML',
+        values: {keywords: keywords}
+    });
+}
+
+function formatAmount(val) {
+    if (!val || val.trim() === '') return '-';
+    var n = parseInt(val);
+    if (isNaN(n)) return val;
+    return n.toLocaleString() + '원';
+}
+
+function collectCompanyText() {
+    var codes = Object.keys(companyDetailStore);
+    if (codes.length === 0) return '';
+    var lines = [];
+    codes.forEach(function(code) {
+        var d = companyDetailStore[code];
+        lines.push('### ' + d.corp_name + ' (' + d.corp_code + ')');
+        lines.push('- 영문명: ' + (d.corp_name_eng || '-'));
+        lines.push('- 종목명: ' + (d.stock_name || '-') + ' / 종목코드: ' + (d.stock_code || '-'));
+        lines.push('- 대표이사: ' + (d.ceo_nm || '-'));
+        lines.push('- 법인구분: ' + (d.corp_cls === 'Y' ? '유가증권' : d.corp_cls === 'K' ? '코스닥' : d.corp_cls === 'N' ? '코넥스' : '기타'));
+        lines.push('- 주소: ' + (d.adres || '-'));
+        lines.push('- 설립일: ' + (d.est_dt || '-'));
+        lines.push('- 결산월: ' + (d.acc_mt || '-') + '월');
+        lines.push('- 업종코드: ' + (d.induty_code || '-'));
+        lines.push('- 사업자번호: ' + (d.bizr_no || '-'));
+        lines.push('- 법인등록번호: ' + (d.jurir_no || '-'));
+        lines.push('- 홈페이지: ' + (d.hm_url || '-'));
+        lines.push('- IR: ' + (d.ir_url || '-'));
+        lines.push('- 전화: ' + (d.phn_no || '-') + ' / 팩스: ' + (d.fax_no || '-'));
+        lines.push('');
+
+        // 재무제표
+        if (d.financial && Object.keys(d.financial).length > 0) {
+            lines.push('#### 재무제표');
+            Object.keys(d.financial).forEach(function(reportKey) {
+                lines.push('##### ' + reportKey);
+                var prevSj = '';
+                d.financial[reportKey].forEach(function(row) {
+                    if (row.sj_nm !== prevSj) {
+                        lines.push('**[' + row.sj_nm + ']**');
+                        prevSj = row.sj_nm;
+                    }
+                    lines.push('- ' + row.account_nm +
+                        ' | 당기: ' + formatAmount(row.thstrm_amount) +
+                        ' | 전기: ' + formatAmount(row.frmtrm_amount) +
+                        ' | 전전기: ' + formatAmount(row.bfefrmtrm_amount));
+                });
+                lines.push('');
+            });
+        }
+        lines.push('');
+    });
+    return lines.join('\n');
+}
+
+function collectNewsText() {
+    if (typeof selectedNewsMap === 'undefined') return '';
+    var keys = Object.keys(selectedNewsMap);
+    if (keys.length === 0) return '';
+    var lines = [];
+    keys.forEach(function(idx, i) {
+        var n = selectedNewsMap[idx];
+        lines.push('### 뉴스 ' + (i + 1) + '. ' + n.title);
+        lines.push('- 출처: ' + n.source);
+        lines.push('- 날짜: ' + n.date);
+        lines.push('- 작성자: ' + (n.author || '-'));
+        lines.push('- URL: ' + n.url);
+        lines.push('- 본문: ' + n.desc);
+        lines.push('');
+    });
+    return lines.join('\n');
+}
+
+function runAiResearch() {
+    var prompt = document.getElementById('ai-prompt').value;
+    if (!prompt.trim()) {
+        alert('AI에 리서치를 요청할 내용을 입력하세요.');
+        return;
+    }
+
+    var companyText = collectCompanyText();
+    var newsText = collectNewsText();
+
+    console.log('[AI Research] company_data:', companyText.length, 'chars');
+    console.log('[AI Research] news_data:', newsText.length, 'chars');
+
+    document.getElementById('ai-result').innerHTML =
+        '<p class="empty-state">AI 리서치 요청 중... (최대 2분 소요)</p>';
+
+    var sysPrompt = document.getElementById('system-prompt').value;
+
+    fetch('/research/ai-research', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: 'prompt=' + encodeURIComponent(prompt) +
+              '&system_prompt=' + encodeURIComponent(sysPrompt) +
+              '&company_data=' + encodeURIComponent(companyText) +
+              '&news_data=' + encodeURIComponent(newsText)
+    })
+    .then(function(res) { return res.text(); })
+    .then(function(html) {
+        var container = document.getElementById('ai-result');
+        container.innerHTML = html;
+        // innerHTML로 삽입된 script는 실행 안 되므로 수동 실행
+        container.querySelectorAll('script').forEach(function(old) {
+            var s = document.createElement('script');
+            s.textContent = old.textContent;
+            old.parentNode.replaceChild(s, old);
+        });
+    });
+}
+
+document.getElementById('research-form').addEventListener('submit', function(e) {
+    document.getElementById('form_title').value = document.getElementById('title').value;
+    document.getElementById('form_topic').value = document.getElementById('topic').value;
+    document.getElementById('keywords_hidden').value = document.getElementById('keywords').value;
+    document.getElementById('ai_report').value = lastAiReport || '';
+    console.log('[save] ai_report length:', (lastAiReport || '').length);
+    if (!lastAiReport) {
+        if (!confirm('AI 리서치 결과가 없습니다. 그래도 저장하시겠습니까?')) {
+            e.preventDefault();
+        }
+    }
+});
+</script>
+{% endblock %}

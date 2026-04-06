@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h3>우수 보고서 업로드</h3>
+    <form hx-post="/best-reports/upload" hx-target="#report-list" hx-swap="innerHTML" hx-encoding="multipart/form-data">
+        <div class="form-row">
+            <input type="file" name="file" accept=".md" required>
+            <button type="submit" class="btn btn-primary">업로드</button>
+        </div>
+    </form>
+</div>
+
+<div class="card" style="margin-top:1.5rem">
+    <h3>우수 보고서 목록</h3>
+    <div id="report-list">
+        {% include "partials/best_report_list.html" %}
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,55 @@
+{% if financial_data %}
+<div class="financial-results">
+    <div class="lookup-header">
+        <strong>{{ corp_name }} 재무제표</strong>
+        <span class="text-muted">OFS (재무제표) | {{ financial_data | length }}개 보고서</span>
+    </div>
+
+    {% for report_key, items in financial_data.items() %}
+    <div class="financial-report">
+        <h4 class="financial-report-title" onclick="this.nextElementSibling.classList.toggle('collapsed')">
+            {{ report_key }}
+            <span class="text-muted">({{ items | length }}개 항목)</span>
+            <span class="toggle-icon">▾</span>
+        </h4>
+        <div class="financial-report-body collapsed">
+            {% set sj_groups = {} %}
+            {% for item in items %}
+                {% if item.sj_nm not in sj_groups %}
+                    {% if sj_groups.update({item.sj_nm: []}) %}{% endif %}
+                {% endif %}
+                {% if sj_groups[item.sj_nm].append(item) %}{% endif %}
+            {% endfor %}
+
+            {% for sj_nm, rows in sj_groups.items() %}
+            <div class="sj-section">
+                <h5>{{ sj_nm }}</h5>
+                <table class="data-table financial-table">
+                    <thead>
+                        <tr>
+                            <th>계정명</th>
+                            <th class="num">당기</th>
+                            <th class="num">전기</th>
+                            <th class="num">전전기</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in rows %}
+                        <tr>
+                            <td>{{ row.account_nm }}</td>
+                            <td class="num">{% if row.thstrm_amount and row.thstrm_amount.strip().lstrip('-').isdigit() %}{{ "{:,}".format(row.thstrm_amount | int) }}{% else %}-{% endif %}</td>
+                            <td class="num">{% if row.frmtrm_amount and row.frmtrm_amount.strip().lstrip('-').isdigit() %}{{ "{:,}".format(row.frmtrm_amount | int) }}{% else %}-{% endif %}</td>
+                            <td class="num">{% if row.bfefrmtrm_amount and row.bfefrmtrm_amount.strip().lstrip('-').isdigit() %}{{ "{:,}".format(row.bfefrmtrm_amount | int) }}{% else %}-{% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<p class="empty-state">재무제표 데이터가 없습니다. DART API 키를 확인하거나, 해당 기업의 공시 여부를 확인하세요.</p>
+{% endif %}

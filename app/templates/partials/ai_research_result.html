@@ -1,0 +1,54 @@
+{% if result and result.error is defined and result.error %}
+<div class="alert alert-error">{{ result.error }}</div>
+{% endif %}
+
+<!-- AI에 전달된 데이터 -->
+{% if company_data or news_data %}
+<div class="ai-context-summary">
+    <h4>AI에 전달된 데이터</h4>
+
+    {% if company_data %}
+    <details class="ai-context-block" open>
+        <summary>기업 정보</summary>
+        <pre class="ai-context-pre">{{ company_data }}</pre>
+    </details>
+    {% endif %}
+
+    {% if news_data %}
+    <details class="ai-context-block" open>
+        <summary>선택된 뉴스</summary>
+        <pre class="ai-context-pre">{{ news_data }}</pre>
+    </details>
+    {% endif %}
+</div>
+{% endif %}
+
+<!-- AI 응답 (마크다운) -->
+{% if result and result.content %}
+<div class="ai-result">
+    <div class="ai-result-header">
+        <h4>AI 리서치 결과</h4>
+        {% if result.usage %}
+        <span class="text-muted">{{ result.usage.total_tokens | default('') }} tokens</span>
+        {% endif %}
+    </div>
+    <div class="ai-result-body markdown-body" id="ai-markdown-output"></div>
+</div>
+<script>
+(function() {
+    var raw = {{ result.content | tojson }};
+    var el = document.getElementById('ai-markdown-output');
+    if (typeof marked !== 'undefined') {
+        el.innerHTML = marked.parse(raw);
+    } else {
+        el.innerHTML = '<pre>' + raw + '</pre>';
+    }
+    // 글로벌 변수에 저장 (리서치 저장 시 사용)
+    if (typeof lastAiReport !== 'undefined') {
+        lastAiReport = raw;
+    } else {
+        window.lastAiReport = raw;
+    }
+})();
+</script>
+{% endif %}

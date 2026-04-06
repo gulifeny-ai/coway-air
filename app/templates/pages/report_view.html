@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div style="margin-bottom:1rem">
+    <a href="/reports" class="btn btn-secondary">목록으로</a>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h3>{{ page_title }}</h3>
+        <span class="text-muted">{{ filename }}</span>
+    </div>
+    <div class="ai-result-body markdown-body" id="report-content"></div>
+</div>
+
+<script>
+(function() {
+    var raw = {{ content | tojson }};
+    var el = document.getElementById('report-content');
+    if (typeof marked !== 'undefined') {
+        el.innerHTML = marked.parse(raw);
+    } else {
+        el.innerHTML = '<pre>' + raw + '</pre>';
+    }
+})();
+</script>
+{% endblock %}

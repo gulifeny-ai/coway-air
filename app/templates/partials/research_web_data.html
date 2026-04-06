@@ -1,0 +1,11 @@
+{% if research and research.web_results %}
+<div class="web-results">
+    {% for item in research.web_results %}
+    <div class="web-result-item">
+        <a href="{{ item.url }}" target="_blank" class="web-result-title">{{ item.title }}</a>
+        <p class="web-result-snippet">{{ item.snippet }}</p>
+        <span class="text-muted">{{ item.url }}</span>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}

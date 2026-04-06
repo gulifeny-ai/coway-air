@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="grid-2">
+    <div class="card">
+        <h3>빠른 조사 시작</h3>
+        <form action="/reports/generate" method="post"
+              hx-post="/reports/generate" hx-target="#quick-result" hx-swap="innerHTML">
+            <div class="form-group">
+                <label for="company_name">기업명</label>
+                <input type="text" id="company_name" name="company_name" placeholder="예: 코웨이" required>
+            </div>
+            <div class="form-group">
+                <label for="keywords">키워드 (선택)</label>
+                <input type="text" id="keywords" name="keywords" placeholder="예: ESG, 해외진출">
+            </div>
+            <button type="submit" class="btn btn-primary">조사 시작</button>
+        </form>
+    </div>
+    <div class="card">
+        <h3>최근 보고서</h3>
+        {% if recent_reports %}
+        <ul class="file-list">
+            {% for r in recent_reports %}
+            <li>{{ r.title }} <span class="text-muted">({{ r.size_kb }}KB)</span></li>
+            {% endfor %}
+        </ul>
+        {% else %}
+        <p class="empty-state">아직 생성된 보고서가 없습니다.</p>
+        {% endif %}
+    </div>
+</div>
+
+<div class="card" style="margin-top:1.5rem">
+    <h3>조사 결과 미리보기</h3>
+    <div id="quick-result" class="preview-area">
+        <p class="empty-state">조사를 시작하면 여기에 결과가 표시됩니다.</p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% if query %}
+    {% if results %}
+    <div class="lookup-header">
+        <span class="text-muted">DART 전자공시 ({{ total | default(0) | int }}개 중 {{ results | length }}건)</span>
+    </div>
+    <div class="dart-list-scroll">
+        {% for c in results %}
+        <div class="dart-row" id="dart-row-{{ c.corp_code }}"
+             data-name="{{ c.corp_name }}" data-code="{{ c.corp_code }}">
+            <div class="dart-row-info">
+                <code>{{ c.corp_code }}</code>
+                <strong>{{ c.corp_name }}</strong>
+                <span class="text-muted">{{ c.corp_eng_name }}</span>
+                {% if c.stock_code %}<span class="tag">{{ c.stock_code }}</span>{% else %}<span class="text-muted">비상장</span>{% endif %}
+            </div>
+            <button type="button" class="btn btn-sm btn-primary"
+                    onclick="addCorpFromRow(this)">
+                선택
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p class="empty-state">"{{ query }}"에 대한 검색 결과가 없습니다.</p>
+    {% endif %}
+{% else %}
+<p class="empty-state">기업명을 입력하면 DART 전자공시 데이터에서 검색합니다.</p>
+{% endif %}

@@ -1,0 +1,132 @@
+{% if news and news.error is defined and news.error %}
+<div class="alert alert-error">{{ news.error }}</div>
+{% endif %}
+
+{% if news and news.articles %}
+<div class="news-results">
+    <div class="lookup-header">
+        <strong>뉴스 검색 결과</strong>
+        <span class="text-muted">{{ news.total | default(0) }}건 | {{ news.from_date }} ~ {{ news.to_date }} (직전 20일) | 인기도순</span>
+    </div>
+    <div class="search-query-info">검색어: <code>{{ news.query }}</code></div>
+
+    <!-- 뉴스 원본 데이터를 JS 변수로 저장 -->
+    <script>
+    var _newsArticles = {{ news.articles | tojson }};
+    if (typeof selectedNewsMap === 'undefined') { var selectedNewsMap = {}; }
+    // 기존 선택 유지
+    var _prevSelected = Object.assign({}, selectedNewsMap);
+    </script>
+
+    <!-- 선택된 뉴스 -->
+    <div id="selected-news-section" class="selected-news-section" style="display:none">
+        <h4>선택된 뉴스</h4>
+        <div id="selected-news-list" class="news-list"></div>
+    </div>
+
+    <!-- 검색 결과 -->
+    <div class="news-list">
+        {% for article in news.articles %}
+        <div class="news-item news-selectable" id="news-{{ loop.index0 }}" data-idx="{{ loop.index0 }}">
+            <div class="news-item-header">
+                <a href="{{ article.url }}" target="_blank" class="news-title" onclick="event.stopPropagation()">{{ article.title }}</a>
+                <span class="news-source">{{ article.source.name if article.source else '' }}</span>
+            </div>
+            <p class="news-desc">{{ article.description or '' }}</p>
+            <div class="news-item-footer">
+                <div class="news-meta">
+                    {% if article.author %}<span>{{ article.author }}</span>{% endif %}
+                    <span>{{ article.publishedAt[:10] if article.publishedAt else '' }}</span>
+                </div>
+                <button type="button" class="btn btn-sm btn-primary" onclick="selectNews(this)">선택</button>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+function selectNews(btn) {
+    var item = btn.closest('.news-item');
+    var idx = parseInt(item.getAttribute('data-idx'));
+    if (selectedNewsMap[idx]) return;
+
+    var a = _newsArticles[idx];
+    selectedNewsMap[idx] = {
+        title: a.title || '',
+        url: a.url || '',
+        source: (a.source && a.source.name) ? a.source.name : '',
+        desc: a.description || '',
+        author: a.author || '',
+        date: a.publishedAt ? a.publishedAt.substring(0, 10) : '',
+        content: a.content || ''
+    };
+
+    item.classList.add('news-selected');
+    btn.textContent = '선택됨';
+    btn.disabled = true;
+
+    renderSelectedNews();
+    if (typeof updateNewsPreview === 'function') updateNewsPreview();
+}
+
+function deselectNews(idx) {
+    delete selectedNewsMap[idx];
+    if (typeof updateNewsPreview === 'function') updateNewsPreview();
+    var item = document.getElementById('news-' + idx);
+    if (item) {
+        item.classList.remove('news-selected');
+        var btn = item.querySelector('.btn');
+        if (btn) { btn.textContent = '선택'; btn.disabled = false; }
+    }
+    renderSelectedNews();
+}
+
+function renderSelectedNews() {
+    var section = document.getElementById('selected-news-section');
+    var list = document.getElementById('selected-news-list');
+    var keys = Object.keys(selectedNewsMap);
+
+    if (keys.length === 0) {
+        section.style.display = 'none';
+        return;
+    }
+    section.style.display = '';
+    list.innerHTML = '';
+
+    keys.forEach(function(idx) {
+        var n = selectedNewsMap[idx];
+        var div = document.createElement('div');
+        div.className = 'news-item news-item-picked';
+        div.innerHTML =
+            '<div class="news-item-header">' +
+                '<a href="' + n.url + '" target="_blank" class="news-title" onclick="event.stopPropagation()">' + n.title + '</a>' +
+                '<span class="news-source">' + n.source + '</span>' +
+            '</div>' +
+            '<p class="news-desc">' + n.desc + '</p>' +
+            '<div class="news-item-footer">' +
+                '<div class="news-meta">' +
+                    (n.author ? '<span>' + n.author + '</span>' : '') +
+                    '<span>' + n.date + '</span>' +
+                '</div>' +
+                '<button type="button" class="btn btn-sm btn-danger" onclick="deselectNews(\'' + idx + '\')">제거</button>' +
+            '</div>';
+        list.appendChild(div);
+    });
+}
+
+// 이전 선택 복원
+(function() {
+    var keys = Object.keys(_prevSelected);
+    if (keys.length > 0) {
+        keys.forEach(function(idx) {
+            selectedNewsMap[idx] = _prevSelected[idx];
+        });
+        renderSelectedNews();
+        if (typeof updateNewsPreview === 'function') updateNewsPreview();
+    }
+})();
+</script>
+{% elif not (news and news.error is defined and news.error) %}
+<p class="empty-state">검색 결과가 없습니다.</p>
+{% endif %}

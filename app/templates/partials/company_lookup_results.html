@@ -1,0 +1,74 @@
+{% if errors %}
+<div class="alert alert-error" style="margin-bottom:1rem">
+    조회 실패: {{ errors | join(', ') }} (API 키를 확인하세요)
+</div>
+{% endif %}
+
+{% if companies %}
+<div class="company-list-header">
+    <strong>기업 정보 ({{ companies | length }}개)</strong>
+</div>
+{% for c in companies %}
+<details class="company-detail-card">
+    <summary class="company-summary">
+        <strong>{{ c.corp_name }}</strong>
+        <span class="text-muted">{{ c.corp_name_eng }}</span>
+        <span class="tag">{{ c.source }}</span>
+        {% if c.stock_code %}<span class="tag">{{ c.stock_code }}</span>{% endif %}
+    </summary>
+    <div class="company-detail-body">
+        <table class="detail-table">
+            <tr>
+                <th>기업코드</th><td><code>{{ c.corp_code }}</code></td>
+                <th>종목코드</th><td>{% if c.stock_code %}{{ c.stock_code }}{% else %}-{% endif %}</td>
+            </tr>
+            <tr>
+                <th>대표이사</th><td>{{ c.ceo_nm }}</td>
+                <th>법인구분</th>
+                <td>
+                    {% if c.corp_cls == 'Y' %}유가증권
+                    {% elif c.corp_cls == 'K' %}코스닥
+                    {% elif c.corp_cls == 'N' %}코넥스
+                    {% else %}기타{% endif %}
+                </td>
+            </tr>
+            <tr>
+                <th>주소</th><td colspan="3">{{ c.adres }}</td>
+            </tr>
+            <tr>
+                <th>설립일</th><td>{{ c.est_dt }}</td>
+                <th>결산월</th><td>{{ c.acc_mt }}월</td>
+            </tr>
+            <tr>
+                <th>업종코드</th><td>{{ c.induty_code }}</td>
+                <th>사업자번호</th><td>{{ c.bizr_no }}</td>
+            </tr>
+            <tr>
+                <th>홈페이지</th>
+                <td>{% if c.hm_url %}<a href="http://{{ c.hm_url }}" target="_blank">{{ c.hm_url }}</a>{% else %}-{% endif %}</td>
+                <th>IR페이지</th>
+                <td>{% if c.ir_url %}<a href="http://{{ c.ir_url }}" target="_blank">{{ c.ir_url }}</a>{% else %}-{% endif %}</td>
+            </tr>
+            <tr>
+                <th>전화번호</th><td>{{ c.phn_no }}</td>
+                <th>팩스번호</th><td>{{ c.fax_no }}</td>
+            </tr>
+        </table>
+        <div style="margin-top:0.8rem">
+            <button type="button" class="btn btn-sm btn-primary"
+                    hx-post="/research/lookup-financial"
+                    hx-vals='{"corp_code": "{{ c.corp_code }}", "corp_name": "{{ c.corp_name }}"}'
+                    hx-target="#financial-{{ c.corp_code }}"
+                    hx-swap="innerHTML"
+                    hx-indicator="#fin-loading-{{ c.corp_code }}">
+                재무제표 조회
+            </button>
+            <span id="fin-loading-{{ c.corp_code }}" class="htmx-indicator text-muted"> 조회 중...</span>
+        </div>
+        <div id="financial-{{ c.corp_code }}" style="margin-top:0.5rem"></div>
+    </div>
+</details>
+{% endfor %}
+{% elif not errors %}
+<p class="empty-state">기업 정보를 찾을 수 없습니다. DART API 키를 관리자 설정에서 확인하세요.</p>
+{% endif %}

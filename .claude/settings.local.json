@@ -1,0 +1,23 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(source /Users/kakao/_my_service/coway-air/venv/bin/activate)",
+      "Bash(pip install:*)",
+      "Bash(source venv/bin/activate)",
+      "Bash(timeout 5 uvicorn app.main:app --host 0.0.0.0 --port 8000)",
+      "Bash(timeout 5 uvicorn app.main:app --host 0.0.0.0 --port 8001)",
+      "Bash(timeout 8 uvicorn app.main:app --host 0.0.0.0 --port 8001)",
+      "Bash(python3 -c \"from app.services.dart_corp_service import get_total_count, get_listed_count, search_corps; print\\(f''전체: {get_total_count\\(\\):,}개''\\); print\\(f''상장: {get_listed_count\\(\\):,}개''\\); print\\(''코웨이 검색:'', search_corps\\(''코웨이''\\)\\)\")",
+      "Bash(python3 -c \"from app.services.dart_corp_service import search_corps; print\\(search_corps\\(''코웨이'', 10\\)\\)\")",
+      "Bash(curl -s \"https://opendart.fss.or.kr/api/company.json?crtfc_key=d8d93529cb352b7c06d05f8911df4e7b3c550567&corp_code=00170558\")",
+      "Bash(python3 -m json.tool)",
+      "Bash(python3 -c \":*)",
+      "Bash(curl -s \"https://opendart.fss.or.kr/api/fnlttSinglAcntAll.json?crtfc_key=d8d93529cb352b7c06d05f8911df4e7b3c550567&corp_code=00170558&bsns_year=2024&reprt_code=11011&fs_div=OFS\")",
+      "Bash(curl -s \"https://newsapi.org/v2/everything?q=코웨이&from=2026-03-29&to=2026-04-05&sortBy=popularity&apiKey=ef62d49974e24f2b834f2023d035bea6&pageSize=3\")",
+      "Bash(curl -s \"https://newsapi.org/v2/everything?q=coway&from=2026-03-29&to=2026-04-05&sortBy=popularity&apiKey=ef62d49974e24f2b834f2023d035bea6&pageSize=3\")",
+      "Bash(kill %1)",
+      "Bash(curl -s \"https://newsapi.org/v2/everything?q=코웨이&from=2026-03-16&to=2026-04-05&sortBy=popularity&apiKey=ef62d49974e24f2b834f2023d035bea6&pageSize=3\")",
+      "Bash(curl -s \"https://newsapi.org/v2/everything?q=coway&from=2026-03-16&to=2026-04-05&sortBy=popularity&apiKey=ef62d49974e24f2b834f2023d035bea6&pageSize=3\")"
+    ]
+  }
+}

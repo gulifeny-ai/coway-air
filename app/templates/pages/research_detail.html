@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="research-detail">
+    <!-- 리서치 헤더 -->
+    <div class="card">
+        <div class="card-header">
+            <div>
+                <h3>{{ research.title }}</h3>
+                <p class="text-muted">{{ research.topic }}</p>
+            </div>
+            <span class="status status-{{ research.status }}">{{ research.status }}</span>
+        </div>
+        <div class="research-meta">
+            <span>기업: <strong>{{ research.company_name }}</strong></span>
+            <span>생성자: {{ research.creator }}</span>
+            <span>생성일: {{ research.created_at }}</span>
+            <span>수정일: {{ research.updated_at }}</span>
+        </div>
+        <div class="research-keywords">
+            {% for kw in research.keywords %}
+            <span class="tag">{{ kw }}</span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Step 1: 기업 정보 수집 -->
+    <div class="card" style="margin-top:1rem">
+        <div class="card-header">
+            <h3>Step 1. 기업 기본정보 수집 (DART / 크레탑)</h3>
+            {% if not research.company_data %}
+            <button class="btn btn-primary btn-sm"
+                    hx-post="/research/{{ research.id }}/collect-company"
+                    hx-target="#company-data"
+                    hx-swap="innerHTML">
+                정보 수집
+            </button>
+            {% endif %}
+        </div>
+        <div id="company-data">
+            {% if research.company_data %}
+                {% include "partials/research_company_data.html" %}
+            {% else %}
+                <p class="empty-state">기업 기본정보를 수집하려면 "정보 수집" 버튼을 클릭하세요.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Step 2: 웹 검색 -->
+    <div class="card" style="margin-top:1rem">
+        <div class="card-header">
+            <h3>Step 2. 최신 동향 수집 (웹 검색)</h3>
+            {% if not research.web_results %}
+            <button class="btn btn-primary btn-sm"
+                    hx-post="/research/{{ research.id }}/collect-web"
+                    hx-target="#web-data"
+                    hx-swap="innerHTML">
+                웹 검색
+            </button>
+            {% endif %}
+        </div>
+        <div id="web-data">
+            {% if research.web_results %}
+                {% include "partials/research_web_data.html" %}
+            {% else %}
+                <p class="empty-state">최신 동향을 수집하려면 "웹 검색" 버튼을 클릭하세요.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Step 3: 보고서 생성 -->
+    <div class="card" style="margin-top:1rem">
+        <div class="card-header">
+            <h3>Step 3. 보고서 생성</h3>
+        </div>
+        {% if research.company_data and research.web_results %}
+        <form action="/reports/generate" method="post">
+            <input type="hidden" name="company_name" value="{{ research.company_name }}">
+            <input type="hidden" name="keywords" value="{{ research.keywords | join(', ') }}">
+            <button type="submit" class="btn btn-primary">수집된 데이터로 보고서 생성</button>
+        </form>
+        {% else %}
+        <p class="empty-state">Step 1, 2를 먼저 완료하면 보고서를 생성할 수 있습니다.</p>
+        {% endif %}
+    </div>
+
+    <div style="margin-top:1.5rem">
+        <a href="/research" class="btn btn-secondary">목록으로</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,11 @@
+{% if research and research.company_data %}
+{% set c = research.company_data %}
+<table class="detail-table">
+    <tr><th>기업명</th><td>{{ c.corp_name }}</td><th>영문명</th><td>{{ c.corp_name_eng }}</td></tr>
+    <tr><th>기업코드</th><td><code>{{ c.corp_code }}</code></td><th>종목코드</th><td>{{ c.stock_code or '-' }}</td></tr>
+    <tr><th>대표이사</th><td>{{ c.ceo_nm }}</td><th>설립일</th><td>{{ c.est_dt }}</td></tr>
+    <tr><th>주소</th><td colspan="3">{{ c.adres }}</td></tr>
+    <tr><th>홈페이지</th><td>{{ c.hm_url or '-' }}</td><th>전화번호</th><td>{{ c.phn_no }}</td></tr>
+    <tr><th>출처</th><td colspan="3" class="text-muted">{{ c.source }}</td></tr>
+</table>
+{% endif %}

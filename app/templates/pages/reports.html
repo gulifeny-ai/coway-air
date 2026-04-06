@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if error %}
+<div class="alert alert-error">{{ error }}</div>
+{% endif %}
+
+<div class="card">
+    <div class="card-header">
+        <h3>보고서 목��</h3>
+    </div>
+
+    {% if reports %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>제목</th>
+                <th>파일명</th>
+                <th>크기</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in reports %}
+            <tr>
+                <td><strong>{{ r.title }}</strong></td>
+                <td class="text-muted"><code>{{ r.filename }}</code></td>
+                <td class="text-muted">{{ r.size_kb }}KB</td>
+                <td><a href="/reports/{{ r.filename }}" class="btn btn-sm btn-primary">보기</a></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="empty-state">저장된 보고서가 없습니다. 시장조사에서 리서치를 저장하면 여기에 표시됩니다.</p>
+    {% endif %}
+</div>
+{% endblock %}
